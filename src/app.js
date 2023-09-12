@@ -1,6 +1,7 @@
 const DNSOperator = require("./lib/DNSOperator");
 const ThresholdValidator = require("./lib/ThresholdValidator");
-
+const MetricsStorage = require("./lib/MetricsStorage");
+const { Client } = require("pg");
 // User-configurable settings
 const userSettings = {
   domain: "www.google.com",
@@ -11,13 +12,20 @@ const userSettings = {
     statusCode: "NOERROR",
     ttl: 300,
   },
-  checkInterval: 5  // in seconds
+  checkInterval: 5, // in seconds
 };
 
 // Initialize DNSOperator and ThresholdValidator
 const dnsOperator = new DNSOperator();
 const validator = new ThresholdValidator(userSettings.thresholds);
-
+const dbClient = new Client({
+  host: "postgres", // docker-compose.yml service name
+  port: 5432,
+  user: "postgres",
+  password: "P@ssw0rd",
+  database: "dnshealthcheckly",
+});
+const metricsStorage = new MetricsStorage(dbClient);
 async function checkDNSHealth() {
   try {
     const metrics = await dnsOperator.query(

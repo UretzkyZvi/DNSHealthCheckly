@@ -47,7 +47,7 @@ class DNSOperator {
         const response = dnsPacket.decode(message);
         result.statusCode = response.rcode || "NOERROR"; // Record the status code
         result.ttl = response.answers[0]?.ttl || null; // Record the Time to Live (TTL)
-        result.nameServer = response.authorities[0]?.name || null; // Record the Name Server
+        result.nameServer = response.answers[0]?.name || null; // Record the Name Server
 
         resolve(result);
         socket.close(); // Close the socket

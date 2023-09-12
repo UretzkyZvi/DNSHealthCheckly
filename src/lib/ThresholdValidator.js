@@ -31,7 +31,7 @@ class ThresholdValidator {
      * @param {number} ttl - The Time to Live in seconds.
      * @returns {boolean} - True if within threshold, false otherwise.
      */
-    validateTTL(ttl) {
+    validateTtl(ttl) {
       return ttl <= this.thresholds.ttl;
     }
   }

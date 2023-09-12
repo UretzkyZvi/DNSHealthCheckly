@@ -4,7 +4,7 @@ const MetricsStorage = require("./lib/MetricsStorage");
 const { Client } = require("pg");
 
 const dbClient = new Client({
-  host: "localhost", // docker-compose.yml service name
+  host: "postgres", // docker-compose.yml service name
   port: 5432,
   user: "postgres",
   password: "P@ssw0rd",
@@ -20,7 +20,7 @@ const userSettings = {
     statusCode: "NOERROR",
     ttl: 300,
   },
-  checkInterval: 5, // in seconds
+  checkInterval: 10, // in seconds
 };
 
 const app = express();

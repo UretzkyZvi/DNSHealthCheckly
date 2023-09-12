@@ -33,6 +33,8 @@ async function checkDNSHealth() {
       userSettings.region
     );
 
+    let allMetricsValid = true;
+
     // Validate metrics against thresholds
     // Validate only the user-selected metrics
     for (const metric of userSettings.metrics) {
@@ -43,7 +45,8 @@ async function checkDNSHealth() {
 
       if (typeof validator[validateFunction] === "function") {
         if (!validator[validateFunction](metrics[metric])) {
-          throw new Error(
+          allMetricsValid = false;
+          console.warn(
             `${metric} ${metrics[metric]} does not meet the threshold.`
           );
         }
@@ -52,7 +55,16 @@ async function checkDNSHealth() {
       }
     }
 
-    console.log(`DNS query for ${userSettings.domain} is healthy.`);
+    // Store the metrics
+    await metricsStorage.storeMetrics(metrics);
+    // Store the server health
+    await metricsStorage.storeServerHealth(allMetricsValid, userSettings.domain, userSettings.region);
+
+    if (allMetricsValid) {
+      console.log(`DNS query for ${userSettings.domain} is healthy.`);
+    } else {
+      console.warn(`DNS query for ${userSettings.domain} had issues.`);
+    }
   } catch (error) {
     console.error(
       `DNS query for ${userSettings.domain} is unhealthy: ${error.message}`

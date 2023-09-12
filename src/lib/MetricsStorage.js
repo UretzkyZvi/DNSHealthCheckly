@@ -58,7 +58,7 @@ class MetricsStorage {
     const values = [new Date(), isValid, domain, region];
     await this.client.query(query, values);
   }
-  
+
   async getMetrics(options = {}) {
     let query = "SELECT * FROM dns_metrics";
     const values = [];
@@ -74,6 +74,38 @@ class MetricsStorage {
     if (options.nameServer) {
       conditions.push(`metrics->>'nameServer' = $${values.length + 1}`);
       values.push(options.nameServer);
+    }
+
+    if (conditions.length > 0) {
+      query += " WHERE " + conditions.join(" AND ");
+    }
+
+    query += " ORDER BY time DESC";
+
+    if (options.limit) {
+      query += ` LIMIT $${values.length + 1}`;
+      values.push(options.limit);
+    }
+
+    const result = await this.client.query(query, values);
+    return result.rows;
+  }
+
+  async getServerHealth(options = {}) {
+    let query = "SELECT * FROM server_health";
+    const values = [];
+    let conditions = [];
+
+    if (options.startTime && options.endTime) {
+      conditions.push(
+        `time BETWEEN $${values.length + 1} AND $${values.length + 2}`
+      );
+      values.push(options.startTime, options.endTime);
+    }
+
+    if (options.serverName) {
+      conditions.push(`domain = $${values.length + 1}`);
+      values.push(options.serverName);
     }
 
     if (conditions.length > 0) {

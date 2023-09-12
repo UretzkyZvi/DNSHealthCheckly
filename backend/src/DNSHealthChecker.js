@@ -20,23 +20,6 @@ class DNSHealthChecker {
 
       let allMetricsValid = true;
 
-      // The actual calls
-      const isResponseTimeValid = this.validator.validateResponseTime(
-        metrics.responseTime
-      );
-      const isStatusCodeValid = this.validator.validateStatusCode(
-        metrics.statusCode
-      );
-      const isTtlValid = this.validator.validateTtl(metrics.ttl);
-
-      // Log the results
-      console.log(
-        "Validation Results:",
-        isResponseTimeValid,
-        isStatusCodeValid,
-        isTtlValid
-      );
-
       // Validate metrics against thresholds
       // Validate only the user-selected metrics
       for (const metric of this.userSettings.metrics) {

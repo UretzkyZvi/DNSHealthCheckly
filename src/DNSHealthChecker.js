@@ -1,38 +1,36 @@
 const DNSOperator = require("./lib/DNSOperator");
 const ThresholdValidator = require("./lib/ThresholdValidator");
 const MetricsStorage = require("./lib/MetricsStorage");
- 
 
 class DNSHealthChecker {
-  constructor(initialSettings, dbClient) {
-    this.settings = initialSettings;
+  constructor(initialSettings, metricsStorage) {
+    this.userSettings = initialSettings;
     // Initialize DNSOperator and ThresholdValidator, and MetricsStorage
     this.dnsOperator = new DNSOperator();
-    this.validator = new ThresholdValidator(userSettings.thresholds);
-    this.dbClient = dbClient;
-    this.metricsStorage = new MetricsStorage(this.dbClient);
+    this.validator = new ThresholdValidator(this.userSettings.thresholds);
+    this.metricsStorage = metricsStorage;
     // Start checking
     this.startChecking();
   }
   async checkDNSHealth() {
     try {
-      const metrics = await dnsOperator.query(
-        userSettings.domain,
-        userSettings.region
+      const metrics = await this.dnsOperator.query(
+        this.userSettings.domain,
+        this.userSettings.region
       );
 
       let allMetricsValid = true;
 
       // Validate metrics against thresholds
       // Validate only the user-selected metrics
-      for (const metric of userSettings.metrics) {
+      for (const metric of this.userSettings.metrics) {
         // Dynamically construct the validation method name based on the user's selected metric.
         const validateFunction = `validate${
           metric.charAt(0).toUpperCase() + metric.slice(1)
         }`;
 
-        if (typeof validator[validateFunction] === "function") {
-          if (!validator[validateFunction](metrics[metric])) {
+        if (typeof this.validator[validateFunction] === "function") {
+          if (!this.validator[validateFunction](metrics[metric])) {
             allMetricsValid = false;
             console.warn(
               `${metric} ${metrics[metric]} does not meet the threshold.`
@@ -44,22 +42,22 @@ class DNSHealthChecker {
       }
 
       // Store the metrics
-      await metricsStorage.storeMetrics(metrics);
+      await this.metricsStorage.storeMetrics(metrics);
       // Store the server health
-      await metricsStorage.storeServerHealth(
+      await this.metricsStorage.storeServerHealth(
         allMetricsValid,
-        userSettings.domain,
-        userSettings.region
+        this.userSettings.domain,
+        this.userSettings.region
       );
 
       if (allMetricsValid) {
-        console.log(`DNS query for ${userSettings.domain} is healthy.`);
+        console.log(`DNS query for ${this.userSettings.domain} is healthy.`);
       } else {
-        console.warn(`DNS query for ${userSettings.domain} had issues.`);
+        console.warn(`DNS query for ${this.userSettings.domain} had issues.`);
       }
     } catch (error) {
       console.error(
-        `DNS query for ${userSettings.domain} is unhealthy: ${error.message}`
+        `DNS query for ${this.userSettings.domain} is unhealthy: ${error.message}`
       );
     }
   }
@@ -67,7 +65,7 @@ class DNSHealthChecker {
   startChecking() {
     setInterval(
       () => this.checkDNSHealth(),
-      this.settings.checkInterval * 1000
+      this.userSettings.checkInterval * 1000
     );
   }
 }

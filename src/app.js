@@ -11,6 +11,7 @@ const userSettings = {
     statusCode: "NOERROR",
     ttl: 300,
   },
+  checkInterval: 5  // in seconds
 };
 
 // Initialize DNSOperator and ThresholdValidator
@@ -52,4 +53,4 @@ async function checkDNSHealth() {
 }
 
 // test the function
-checkDNSHealth();
+setInterval(checkDNSHealth, userSettings.checkInterval * 1000);

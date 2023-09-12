@@ -1,12 +1,11 @@
 const DNSOperator = require("./lib/DNSOperator");
 const ThresholdValidator = require("./lib/ThresholdValidator");
-const MetricsStorage = require("./lib/MetricsStorage");
 
 class DNSHealthChecker {
-  constructor(initialSettings, metricsStorage) {
+  constructor(initialSettings, metricsStorage, dnsOperator = null) {
     this.userSettings = initialSettings;
     // Initialize DNSOperator and ThresholdValidator, and MetricsStorage
-    this.dnsOperator = new DNSOperator();
+    this.dnsOperator = dnsOperator || new DNSOperator();
     this.validator = new ThresholdValidator(this.userSettings.thresholds);
     this.metricsStorage = metricsStorage;
     // Start checking
@@ -20,6 +19,23 @@ class DNSHealthChecker {
       );
 
       let allMetricsValid = true;
+
+      // The actual calls
+      const isResponseTimeValid = this.validator.validateResponseTime(
+        metrics.responseTime
+      );
+      const isStatusCodeValid = this.validator.validateStatusCode(
+        metrics.statusCode
+      );
+      const isTtlValid = this.validator.validateTtl(metrics.ttl);
+
+      // Log the results
+      console.log(
+        "Validation Results:",
+        isResponseTimeValid,
+        isStatusCodeValid,
+        isTtlValid
+      );
 
       // Validate metrics against thresholds
       // Validate only the user-selected metrics

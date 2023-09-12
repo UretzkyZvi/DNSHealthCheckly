@@ -1,0 +1,1 @@
+# DNSHealthCheckly project

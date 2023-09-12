@@ -32,7 +32,7 @@ class ThresholdValidator {
      * @returns {boolean} - True if within threshold, false otherwise.
      */
     validateTTL(ttl) {
-      return ttl >= this.thresholds.ttl;
+      return ttl <= this.thresholds.ttl;
     }
   }
   

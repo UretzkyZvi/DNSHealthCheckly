@@ -44,7 +44,7 @@ To run this project locally, follow these steps:
     npm start
     ```
 
-The service should be up and running at `http://localhost:3000`.
+The service should be up and running at `http://localhost:8081`.
 
 ## API Endpoints
 

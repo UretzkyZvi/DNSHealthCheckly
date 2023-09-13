@@ -39,8 +39,8 @@ app.get("/config", (req, res) => {
 app.post("/config", (req, res) => {
   // Here, add some validation for incoming settings if needed
   Object.assign(userSettings, req.body);
-  healthChecker.updateSettings(userSettings);
-  res.json({ message: "Configuration updated." });
+  const updatedSettings =healthChecker.updateSettings(userSettings);
+  res.json({ message: "Configuration updated.", updatedSettings });
 });
 
 // Endpoint to get DNS metrics

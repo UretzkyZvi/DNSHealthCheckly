@@ -31,25 +31,28 @@ The primary challenge is to create a JavaScript function that returns essential 
 
 ### Installation
 
-\```bash
 # Clone the repository
 git clone https://github.com/UretzkyZvi/DNSHealthCheckly.git
 
 # Navigate to the project folder
+```
 cd DNSHealthCheckly
+```
 
 # Install dependencies for backend
+```
 cd backend && npm install
-
+```
 # Install dependencies for frontend
+```
 cd ../frontend && npm install
-\```
+```
 
 Or use Docker:
 
-\```bash
+```
 docker-compose up --build
-\```
+```
 
 ## Design & Implementation
 
@@ -78,7 +81,7 @@ Refer to the individual README files in the `backend` and `frontend` directories
 
 Run the following command to execute the acceptance tests:
 
-\```bash
+```
 npm test
-\```
+```
 

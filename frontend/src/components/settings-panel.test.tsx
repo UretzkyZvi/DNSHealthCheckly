@@ -37,22 +37,24 @@ describe("SettingsPanel", () => {
     expect(title).toBeInTheDocument();
   });
 
-  // ... other unit tests like above for different parts
+  test("renders Domain field", () => {
+    const domainField = screen.getByTestId('domain-input');
+    expect(domainField).toBeInTheDocument();
+    expect(domainField).toHaveValue(mockSettings.domain);
+  });
 
   test("calls updateSettings when Update button is clicked", () => {
     // setup: fill the form fields
-    fireEvent.change(screen.getByLabelText(/Domain/), {
+    fireEvent.change(screen.getByTestId('domain-input'), {
       target: { value: "newDomain.com" },
     });
 
     // execute: click the Update button
-    fireEvent.click(screen.getByText("Update"));
+    fireEvent.click(screen.getByTestId("update-button"));
 
     // verify: updateSettings should be called
     expect(mockUpdateSettings)
-      .toHaveBeenCalledWith
-      // expected updatedSettings object
-      ();
+      .toHaveBeenCalledWith({...mockSettings, domain: "newDomain.com"});
   });
 
   test("calls resetSettings when Reset to Default button is clicked", () => {

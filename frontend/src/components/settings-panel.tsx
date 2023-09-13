@@ -92,13 +92,14 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 md:col-span-2">
               {/* Domain Input */}
               <div className="sm:col-span-4">
-                <Text>
+                <Text id="domain">
                   <Bold>Domain</Bold>
                 </Text>
                 <TextInput
                   type="text"
                   name="domain"
                   id="domain"
+                  data-testid="domain-input"
                   value={formData.domain || settings?.domain}
                   onChange={(e) =>
                     handleInputChange(e.target.name, e.target.value)
@@ -181,7 +182,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                       "hover:cursor-pointer   hover:border-tremor-brand-subtle",
                     )}
                     checked={ttlEnabled}
-                    onClick={(e) => {
+                    onChange={(e) => {
                       const target = e.target as HTMLInputElement;
                       if (target.checked) {
                         setTtlEnabled(true);
@@ -212,7 +213,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <Button variant="secondary" onClick={() => handleResetClick()}>
             Reset to Default
           </Button>
-          <Button variant="primary" onClick={() => handleUpdateClick()}>
+          <Button variant="primary" data-testid="update-button" onClick={() => handleUpdateClick()}>
             Update
           </Button>
         </div>

@@ -24,7 +24,7 @@ const userSettings = {
 };
 
 const app = express();
-const port = 3000;
+const port = 8081;
 const metricsStorage = new MetricsStorage(dbClient);
 const healthChecker = new DNSHealthChecker(userSettings, metricsStorage);
 

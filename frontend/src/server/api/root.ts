@@ -1,4 +1,4 @@
-import { exampleRouter } from "~/server/api/routers/example";
+import { DNSHealthCheckerRouter } from "~/server/api/routers/dns-health-checker";
 import { createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -7,7 +7,7 @@ import { createTRPCRouter } from "~/server/api/trpc";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  example: exampleRouter,
+  healthCheckerRouter: DNSHealthCheckerRouter,
 });
 
 // export type definition of API

@@ -17,7 +17,6 @@ DNS HealthCheckly is a proof-of-concept application designed to address the chal
    - [Thresholds and Checks](#thresholds-and-checks)
 4. [Usage](#usage)
 5. [Testing](#testing)
-6. [Contributors](#contributors)
 
 ## The Problem
 
@@ -34,10 +33,10 @@ The primary challenge is to create a JavaScript function that returns essential 
 
 \```bash
 # Clone the repository
-git clone https://github.com/yourusername/dns-healthcheckly.git
+git clone https://github.com/UretzkyZvi/DNSHealthCheckly.git
 
 # Navigate to the project folder
-cd dns-healthcheckly
+cd DNSHealthCheckly
 
 # Install dependencies for backend
 cd backend && npm install
@@ -83,6 +82,3 @@ Run the following command to execute the acceptance tests:
 npm test
 \```
 
-## Contributors
-
-- [Your Name](https://github.com/yourusername)

@@ -1,28 +1,30 @@
-# Create T3 App
+# DNS HealthCheckly Frontend
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+This frontend project is built using Next.js and is part of the DNS HealthCheckly application. The project is initially bootstrapped with `create-t3-app` and has undergone several changes to fit its purpose.
 
-## What's next? How do I make an app with this?
-
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
-
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Tech Stack
 
 - [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
 - [Tailwind CSS](https://tailwindcss.com)
 - [tRPC](https://trpc.io)
 
-## Learn More
+## Getting Started with Docker Compose
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+This project is configured to run using Docker Compose. This makes setting up a local development environment quick and easy.
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+To run the project:
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+1. Make sure Docker and Docker Compose are installed on your machine.
+2. Navigate to the root directory where `docker-compose.yml` is located.
+3. Run `docker-compose up`.
 
-## How do I deploy this?
+This will start the frontend service and its dependencies. The frontend will be accessible at `http://localhost:3000`.
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+### Environment Variables
+
+The frontend communicates with the backend API. The API URL can be set using the `API_URL` environment variable in the `docker-compose.yml` file. The current configuration is set to communicate with the backend service.
+
+```yml
+environment:
+  - API_URL="http://backend:8081"

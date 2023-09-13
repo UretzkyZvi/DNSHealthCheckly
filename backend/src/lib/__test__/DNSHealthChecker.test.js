@@ -104,4 +104,26 @@ describe("DNSHealthChecker", () => {
       "Global"
     );
   });
+
+  it("should correctly update settings", () => {
+    const newSettings = {
+      domain: "www.example.com",
+      region: "Global",
+      metrics: ["statusCode"],
+      thresholds: {
+        statusCode: "NXDOMAIN",
+      },
+      checkInterval: 10,
+    };
+
+    // Call the method to update the settings
+    const updatedSettings = dnsHealthChecker.updateSettings(newSettings);
+
+    // Verify that the settings have been updated
+    expect(updatedSettings.domain).toBe("www.example.com");
+    expect(updatedSettings.region).toBe("Global");
+    expect(updatedSettings.metrics).toEqual(["statusCode"]);
+    expect(updatedSettings.thresholds.statusCode).toBe("NXDOMAIN");
+    expect(updatedSettings.checkInterval).toBe(10);
+  });
 });

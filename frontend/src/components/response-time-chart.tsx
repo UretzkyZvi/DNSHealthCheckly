@@ -18,7 +18,7 @@ const ResponseTimeChart: FC<ResponseTimeChartProps> = ({ data }) => {
       categories={["Response Time"]}
       colors={["blue"]}
       yAxisWidth={48}
-    
+     data-testid="bar-chart"
     />
   );
 };

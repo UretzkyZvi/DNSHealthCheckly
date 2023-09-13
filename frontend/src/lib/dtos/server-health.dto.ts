@@ -1,5 +1,5 @@
 export interface ServerHealth {
-    isValid: boolean;
+    is_valid: boolean;
     domain: string;
     region: string;
     time: string; 

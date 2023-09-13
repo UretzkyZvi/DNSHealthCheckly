@@ -1,7 +1,11 @@
 export interface Metrics {
+  id: number;
+  time: string;
+  metrics: {
     responseTime: number;
     statusCode: string;
     ttl: number;
-    time: string;  
     nameServer: string;
+    region: string;
   }
+}

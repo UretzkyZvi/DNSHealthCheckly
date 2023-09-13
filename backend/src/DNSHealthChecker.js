@@ -12,6 +12,10 @@ class DNSHealthChecker {
     // Start checking
     this.startChecking();
   }
+  /**
+   * Checks the DNS health.
+   * @returns {void}
+   * */
   async checkDNSHealth() {
     try {
       const metrics = await this.dnsOperator.query(
@@ -61,17 +65,32 @@ class DNSHealthChecker {
       );
     }
   }
-
+  /**
+   * Updates the settings with new values.
+   * @param {Object} newSettings - The new settings.
+   * @returns {Object} - The updated settings.
+   */
   updateSettings(newSettings) {
     this.userSettings = {
       ...this.userSettings,
       ...newSettings,
     };
+    console.log("Updated settings: ", this.userSettings);
+
+    // Update the thresholds in the validator
+    if (newSettings.thresholds) {
+      this.validator.updateThresholds(newSettings.thresholds);
+    }
+
     // Restart the checking with new settings
     this.restartChecking();
     return this.userSettings;
   }
 
+  /**
+   * Restarts the checking with new settings.
+   * @returns {void}
+   */
   restartChecking() {
     // Clear existing interval
     if (this.checkIntervalId) {
@@ -81,6 +100,10 @@ class DNSHealthChecker {
     // Restart with new settings
     this.startChecking();
   }
+  /**
+   *  Starts the checking.
+   *  @returns {void}
+   **/
   startChecking() {
     this.checkIntervalId = setInterval(
       () => this.checkDNSHealth(),

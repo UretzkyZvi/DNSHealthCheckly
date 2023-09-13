@@ -8,6 +8,7 @@ class DNSHealthChecker {
     this.dnsOperator = dnsOperator || new DNSOperator();
     this.validator = new ThresholdValidator(this.userSettings.thresholds);
     this.metricsStorage = metricsStorage;
+    this.checkIntervalId = null;
     // Start checking
     this.startChecking();
   }
@@ -61,8 +62,27 @@ class DNSHealthChecker {
     }
   }
 
+  updateSettings(newSettings) {
+    this.userSettings = {
+      ...this.userSettings,
+      ...newSettings,
+    };
+    // Restart the checking with new settings
+    this.restartChecking();
+    return this.userSettings;
+  }
+
+  restartChecking() {
+    // Clear existing interval
+    if (this.checkIntervalId) {
+      clearInterval(this.checkIntervalId);
+    }
+
+    // Restart with new settings
+    this.startChecking();
+  }
   startChecking() {
-    setInterval(
+    this.checkIntervalId = setInterval(
       () => this.checkDNSHealth(),
       this.userSettings.checkInterval * 1000
     );

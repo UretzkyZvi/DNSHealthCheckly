@@ -19,6 +19,7 @@ const TTLChart: FC<TTLChartChartProps> = ({ data }) => {
       categories={["TTL Value"]}
       colors={["blue"]}
       yAxisWidth={48}
+      data-testid="bar-chart"
     />
   );
 };

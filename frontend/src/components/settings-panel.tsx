@@ -84,7 +84,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       <form>
         <div className="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-gray-900/10 pb-12 md:grid-cols-3">
           <div>
-            <Title>Monitoring Settings</Title>
+            <Title data-testid="monitoring-settings-title">Monitoring Settings</Title>
             <Subtitle>Configure your DNS monitoring settings.</Subtitle>
           </div>
 
@@ -210,10 +210,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           </div>
         </div>
         <div className="mt-6 flex items-center justify-end gap-x-6">
-          <Button variant="secondary" onClick={() => handleResetClick()}>
+          <Button type="submit" variant="secondary" data-testid="reset-button" onClick={() => handleResetClick()}>
             Reset to Default
           </Button>
-          <Button variant="primary" data-testid="update-button" onClick={() => handleUpdateClick()}>
+          <Button type="submit" variant="primary" data-testid="update-button" onClick={() => handleUpdateClick()}>
             Update
           </Button>
         </div>

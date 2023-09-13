@@ -34,12 +34,13 @@ import ResponseTimeChart, {
 } from "~/components/response-time-chart";
 import TTLChart, { TTLValue } from "~/components/ttl-chart";
 import { SettingsPanel } from "~/components/settings-panel";
+import { NextPage } from "next";
 interface Tracker {
   color: Color;
   tooltip: string;
 }
 
-export default function Home() {
+const Home: NextPage = () =>{
   const [settings, setSettings] = useState<Settings>();
   const [metrics, setMetrics] = useState<Metrics[]>([]);
   const [serverHealth, setServerHealth] = useState<ServerHealth[]>([]);
@@ -250,3 +251,5 @@ export default function Home() {
     </>
   );
 }
+
+export default Home;

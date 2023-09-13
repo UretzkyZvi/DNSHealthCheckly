@@ -9,12 +9,16 @@
     "start": "next start"
   },
   "dependencies": {
+    "@headlessui/tailwindcss": "^0.2.0",
+    "@heroicons/react": "^2.0.18",
     "@t3-oss/env-nextjs": "^0.6.0",
     "@tanstack/react-query": "^4.32.6",
+    "@tremor/react": "^3.7.4",
     "@trpc/client": "^10.37.1",
     "@trpc/next": "^10.37.1",
     "@trpc/react-query": "^10.37.1",
     "@trpc/server": "^10.37.1",
+    "clsx": "^2.0.0",
     "next": "^13.4.19",
     "react": "18.2.0",
     "react-dom": "18.2.0",

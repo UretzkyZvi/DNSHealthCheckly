@@ -25,10 +25,10 @@ export const DNSHealthCheckerRouter = createTRPCRouter({
       domain: z.string().optional(),
       region: z.string(),
       metrics: z.array(z.string()),
-      thresholds: z.object({}),
+      thresholds:  z.record(z.any()),
       checkInterval: z.number(),
     })).mutation(
-      async (input) => {
+      async ({input}) => {
         const result = await fetch(`${env.API_URL}/config`, {
           method: 'POST',
           headers: {
@@ -36,6 +36,7 @@ export const DNSHealthCheckerRouter = createTRPCRouter({
           },
           body: JSON.stringify(input),
         })
+        
         const response = await result.json();
         return response as Settings;
       }
@@ -73,16 +74,16 @@ export const DNSHealthCheckerRouter = createTRPCRouter({
     z.object({
       startTime: z.string().optional(),
       endTime: z.string().optional(),
-      nameServer: z.string().optional(),
+      serverName: z.string().optional(),
       limit: z.number().optional(),
     })
   ).query(async ({input}) => {
-    const { startTime, endTime, nameServer, limit } = input;
+    const { startTime, endTime, serverName, limit } = input;
      // Construct query parameters
      const params = new URLSearchParams();
      if (startTime) params.append('startTime', startTime);
      if (endTime) params.append('endTime', endTime);
-     if (nameServer) params.append('nameServer', nameServer);
+     if (serverName) params.append('serverName', serverName);
      if (limit) params.append('limit', limit.toString());
  
     const result = await fetch(`${env.API_URL}/server-health?${params.toString()}`, {

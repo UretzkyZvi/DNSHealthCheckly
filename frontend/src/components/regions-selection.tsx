@@ -15,15 +15,21 @@ const REGIONAL_DNS_SERVERS = [
 
 interface RegionSelectionProps {
   currentRegion?: string;
+  onChange: (region: string) => void;
 }
 
-const RegionSelection: FC<RegionSelectionProps> = ({ currentRegion }) => {
+const RegionSelection: FC<RegionSelectionProps> = ({
+  currentRegion,
+  onChange,
+}) => {
   const [selected, setSelected] = useState<string>(currentRegion ?? "Global");
+  const handleInputChange = (value: string) => {
+    setSelected(value);
+    onChange(value);
+  };
+
   return (
-    <Select
-      value={selected}
-      onValueChange={setSelected}
-      >
+    <Select value={selected} onValueChange={handleInputChange}>
       {REGIONAL_DNS_SERVERS.map((region) => (
         <SelectItem key={region.split(" ").join("-")} value={region}>
           {region}

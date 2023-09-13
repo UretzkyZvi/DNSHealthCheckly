@@ -9,69 +9,36 @@ import {
   TabGroup,
   TabPanel,
   TabPanels,
-  Button,
-  TextInput,
-  NumberInput,
-  Subtitle,
-  Bold,
-  Italic,
-  Table,
-  TableHead,
-  TableRow,
-  TableHeaderCell,
-  TableBody,
-  TableCell,
   Color,
   Flex,
   Icon,
   Tracker,
-  BarChart,
+  Subtitle,
 } from "@tremor/react";
-import {
-  NextButton,
-  PageButton,
-  Pagination,
-  PrevButton,
-} from "react-headless-pagination";
 
 import { api } from "~/utils/api";
-import { use, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Settings } from "~/lib/dtos/settings.dto";
-import RegionSelection from "~/components/regions-selection";
-import CheckIntervalSelection from "~/components/check-interval-selection";
-import clsx from "clsx";
 import { Metrics } from "~/lib/dtos/metrics.dto";
 import { ServerHealth } from "~/lib/dtos/server-health.dto";
 import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import {
   ArrowDownCircleIcon,
-  ArrowLeftIcon,
-  ArrowRightIcon,
   CheckCircleIcon,
   CogIcon,
   MinusCircleIcon,
 } from "@heroicons/react/20/solid";
 import { DateTime } from "luxon";
-import { set } from "zod";
+import MetricsTable from "~/components/metrics-table";
+import ResponseTimeChart, {
+  ResponseTimeValue,
+} from "~/components/response-time-chart";
+import TTLChart, { TTLValue } from "~/components/ttl-chart";
+import { SettingsPanel } from "~/components/settings-panel";
 interface Tracker {
   color: Color;
   tooltip: string;
 }
 
-interface ResponseTimeValue {
-  name: string;
-  "Response Time": number;
-}
-interface TTLValue {
-  name: string;
-  "TTL Value": number;
-}
 export default function Home() {
   const [settings, setSettings] = useState<Settings>();
   const [metrics, setMetrics] = useState<Metrics[]>([]);
@@ -96,7 +63,7 @@ export default function Home() {
   );
   const serverHealthQuery = api.healthCheckerRouter.getServerHealth.useQuery(
     {
-      nameServer: settings?.domain,
+      serverName: settings?.domain,
       limit: 10,
     },
     {
@@ -105,6 +72,9 @@ export default function Home() {
         settings !== undefined ? settings?.checkInterval * 1000 : 6000,
     },
   );
+
+  const updateSettingsMutation =
+    api.healthCheckerRouter.setSettings.useMutation();
 
   useEffect(() => {
     if (settingsQuery.data) {
@@ -139,57 +109,45 @@ export default function Home() {
     }
     if (serverHealth) {
       const tracker: Tracker[] = [];
-      serverHealth.map((server) => {
-        if (server.is_valid === true) {
-          tracker.push({ color: "emerald", tooltip: "Server is healthy" });
-        } else {
-          tracker.push({ color: "rose", tooltip: "Server is unhealthy" });
-        }
-      });
+      serverHealth
+        .sort(
+          (a, b) =>
+            DateTime.fromISO(a.time).toMillis() -
+            DateTime.fromISO(b.time).toMillis(),
+        )
+        .map((server) => {
+          if (server.is_valid === true) {
+            tracker.push({ color: "emerald", tooltip: "Server is healthy" });
+          } else {
+            tracker.push({ color: "rose", tooltip: "Server is unhealthy" });
+          }
+        });
       setServerHealthTracker(tracker);
     }
   }, [metrics, serverHealth]);
 
-  // Table setup
-  const columnHelper = createColumnHelper<Metrics>();
-  const columns = useMemo<any[]>(
-    () => [
-      columnHelper.accessor("id", {
-        id: "id",
-        header: "ID",
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor("time", {
-        id: "time",
-        header: "Date",
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor("metrics.nameServer", {
-        id: "nameServer",
-        header: "Server name",
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor("metrics.region", {
-        id: "region",
-        header: "Region",
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor("metrics.statusCode", {
-        id: "statusCode",
-        header: "Status",
-        cell: (info) => info.getValue(),
-      }),
-    ],
-    [],
-  );
-  const table = useReactTable<Metrics>({
-    data: metrics,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-  });
-  // End Table setup
-  console.log;
+  const handleResetSettings = async () => {
+    await updateSettingsMutation.mutateAsync({
+      checkInterval: 10,
+      domain: "www.google.com",
+      metrics: ["responseTime", "statusCode"],
+      region: "Global",
+      thresholds: {
+        responseTime: 200,
+        statusCode: "NOERROR",
+      },
+    });
+  };
+
+  const handleUpdateSettings = async (updatedSettings: Settings) => {
+    try {
+      await updateSettingsMutation.mutateAsync(updatedSettings);
+      await settingsQuery.refetch();
+    } catch (error) {
+      console.error("Failed to update settings:", error);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -198,50 +156,44 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="p-12">
-        <Title>Dashboard</Title>
+        <Title>DNS HealthCheckly Dashboard</Title>
         <Text></Text>
 
         <TabGroup className="mt-6">
           <TabList>
             <Tab>Monitoring</Tab>
-            <Tab>Settings</Tab>
+            <Tab>Monitoring Configuration Settings</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
               <Grid numItemsMd={2} numItemsLg={3} className="mt-6 gap-6">
                 <Card>
-                  <Title>
-                    Response time of the DNS over the last 10 checks (in
-                    milliseconds)
-                  </Title>
-                  <BarChart
-                    className="mt-6"
-                    data={responseTimeChart}
-                    index="name"
-                    categories={["Response Time"]}
-                    colors={["blue"]}
-                    yAxisWidth={48}
-                  />
+                  <Title>DNS Response Time Over Last 10 Checks (ms)</Title>
+                  <Subtitle>
+                    This chart displays the response time in milliseconds for
+                    each of the last 10 DNS checks.
+                  </Subtitle>
+                  <ResponseTimeChart data={responseTimeChart} />
                 </Card>
                 <Card>
                   <div className="h-28">
-                    <Title>
-                      Time to live of the DNS over the last 10 checks (in
-                      seconds)
-                    </Title>
-                    <BarChart
-                      className="mt-6"
-                      data={ttlChart}
-                      index="name"
-                      categories={["TTL Value"]}
-                      colors={["blue"]}
-                      yAxisWidth={48}
-                    />
+                    <Title>DNS Time to Live Over Last 10 Checks (s)</Title>
+                    <Subtitle>
+                      This chart displays the Time-to-Live (TTL) values over the
+                      last 10 checks, helping you understand the DNS server's
+                      caching performance.
+                    </Subtitle>
+                    <TTLChart data={ttlChart} />
                   </div>
                 </Card>
                 <Card>
-                  <Flex>
+                  <div>
                     <Title className="w-full">Server health status</Title>
+                    <Subtitle>
+                      The tracker below gives you a quick snapshot of your
+                      server's health status. Each color represents a different
+                      state of operation or health
+                    </Subtitle>
                     <Flex justifyContent="end" className="-mr-2 -space-x-2">
                       <Icon
                         icon={CheckCircleIcon}
@@ -260,88 +212,22 @@ export default function Home() {
                         tooltip="Downtime"
                       />
                     </Flex>
-                  </Flex>
-
+                  </div>
                   <Tracker data={serverHealthTracker} className="mt-2" />
-                  <Flex className="mt-2">
-                    <Text>Jul 14</Text>
-                    <Text>Aug 23</Text>
-                  </Flex>
                 </Card>
               </Grid>
               <div className="mt-6">
                 <Card>
                   <div>
-                    <Table>
-                      <TableHead>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                          <TableRow>
-                            {headerGroup.headers.map((header) => (
-                              <TableHeaderCell>
-                                {header.isPlaceholder
-                                  ? null
-                                  : flexRender(
-                                      header.column.columnDef.header,
-                                      header.getContext(),
-                                    )}
-                              </TableHeaderCell>
-                            ))}
-                          </TableRow>
-                        ))}
-                      </TableHead>
-                      <TableBody>
-                        {table.getRowModel().rows.map((row) => (
-                          <TableRow key={row.id}>
-                            {row.getVisibleCells().map((cell) => (
-                              <TableCell>
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext(),
-                                )}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                    <div className="flex  items-center justify-end pt-2">
-                      {table.getPageCount() !== 1 && (
-                        <>
-                          <Pagination
-                            className="flex h-10 select-none items-center text-sm  sm:max-w-7xl"
-                            currentPage={table.getState().pagination.pageIndex}
-                            edgePageCount={2}
-                            middlePagesSiblingCount={1}
-                            setCurrentPage={(page) => {
-                              table.setPageIndex(page);
-                            }}
-                            totalPages={table.getPageCount()}
-                            truncableClassName="w-10 px-0.5 text-center"
-                            truncableText="..."
-                          >
-                            <PrevButton className="mr-2 flex  cursor-pointer items-center text-tremor-brand hover:text-tremor-brand-subtle focus:outline-none">
-                              <ArrowLeftIcon className="mr-3" />
-                            </PrevButton>
-
-                            <div className="flex flex-grow items-center justify-center">
-                              <nav className="flex flex-grow justify-center">
-                                <ul className="flex items-center">
-                                  <PageButton
-                                    activeClassName="bg-tremor-brand-subtle text-tremor-brand"
-                                    className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full"
-                                    inactiveClassName="text-gray-500"
-                                  />
-                                </ul>
-                              </nav>
-
-                              <NextButton className="hover:text-mine-shaft-600 dark:hover:text-mine-shaft-200 mr-2 flex cursor-pointer items-center text-gray-500 focus:outline-none">
-                                <ArrowRightIcon className="ml-3" />
-                              </NextButton>
-                            </div>
-                          </Pagination>
-                        </>
-                      )}
-                    </div>
+                    <Title>Latest DNS Health Checks</Title>
+                    <Subtitle>
+                      This table provides a comprehensive overview of the DNS
+                      metrics for each of the recent checks. It includes
+                      response time, status codes, Time-to-Live (TTL), and other
+                      essential data to help you understand your DNS
+                      performance.
+                    </Subtitle>
+                    <MetricsTable metrics={metrics} />
                   </div>
                 </Card>
               </div>
@@ -349,109 +235,13 @@ export default function Home() {
 
             <TabPanel>
               <div className="mt-6">
-                <Card>
-                  <form>
-                    <div className="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-gray-900/10 pb-12 md:grid-cols-3">
-                      <div>
-                        <Title>Monitoring Settings</Title>
-                        <Subtitle>
-                          Configure your DNS monitoring settings.
-                        </Subtitle>
-                      </div>
-
-                      {settings && (
-                        <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 md:col-span-2">
-                          {/* Domain Input */}
-                          <div className="sm:col-span-4">
-                            <Text>
-                              <Bold>Domain</Bold>
-                            </Text>
-                            <TextInput
-                              type="text"
-                              name="domain"
-                              id="domain"
-                              value={settings?.domain}
-                            ></TextInput>
-                          </div>
-
-                          {/* Region Input */}
-                          <div className="sm:col-span-4">
-                            <Text>
-                              <Bold>Region</Bold>
-                            </Text>
-                            <RegionSelection currentRegion={settings?.region} />
-                          </div>
-                          <div className="sm:col-span-4">
-                            <Text>
-                              <Bold>Check Interval</Bold>
-                            </Text>
-                            <CheckIntervalSelection
-                              currentInterval={settings?.checkInterval}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-gray-900/10 pb-12 md:grid-cols-3">
-                      <div>
-                        <Title>Health Check Settings</Title>
-                        <Subtitle>
-                          Configure your DNS health check settings.
-                        </Subtitle>
-                      </div>
-
-                      <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 pt-4 sm:grid-cols-6 md:col-span-2">
-                        <div className="sm:col-span-4">
-                          <Text>
-                            <Bold>Response Time Threshold</Bold>
-                          </Text>
-                          <NumberInput
-                            enableStepper={true}
-                            name="response-time-threshold"
-                            id="response-time-threshold"
-                            value={settings?.thresholds.responseTime}
-                          />
-                        </div>
-                        <div className="sm:col-span-4">
-                          <Text>
-                            <Bold>Time to Live Threshold</Bold>
-                          </Text>
-                          <Text>
-                            <Italic>
-                              Check the box to monitor DNS health via TTL
-                              values.
-                            </Italic>
-                          </Text>
-                          <div className="relative flex items-center space-x-4">
-                            <div className="flex h-6 items-center">
-                              <input
-                                id="ttl_enabled"
-                                aria-describedby="ttl_enabled-description"
-                                name="ttl_enabled"
-                                type="checkbox"
-                                className={clsx(
-                                  "h-6 w-6 rounded border-gray-300 text-tremor-brand-subtle focus:ring-tremor-brand-subtle",
-                                  "hover:cursor-pointer   hover:border-tremor-brand-subtle",
-                                )}
-                              />
-                            </div>
-                            <NumberInput
-                              enableStepper={true}
-                              name="time-to-live-threshold"
-                              id="time-to-live-threshold"
-                              value={settings?.thresholds.ttl}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Save Button */}
-                    <div className="mt-6 flex items-center justify-end gap-x-6">
-                      <Button variant="secondary">Cancel</Button>
-                      <Button variant="primary">Save</Button>
-                    </div>
-                  </form>
-                </Card>
+                {settings && (
+                  <SettingsPanel
+                    settings={settings}
+                    updateSettings={handleUpdateSettings}
+                    resetSettings={handleResetSettings}
+                  />
+                )}
               </div>
             </TabPanel>
           </TabPanels>

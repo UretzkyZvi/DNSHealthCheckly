@@ -58,7 +58,11 @@ class MetricsStorage {
     const values = [new Date(), isValid, domain, region];
     await this.client.query(query, values);
   }
-
+  /**
+   *  Retrieves metrics from the database.
+   * @param {object} options  - The options to filter the metrics.
+   * @returns {Promise<Array>} - A promise that resolves to an array of metrics.
+   */
   async getMetrics(options = {}) {
     let query = "SELECT * FROM dns_metrics";
     const values = [];
@@ -91,6 +95,11 @@ class MetricsStorage {
     return result.rows;
   }
 
+  /**
+   * Retrieves server health data from the database.
+   * @param {object} options - The options to filter the server health data.
+   * @returns {Promise<Array>} - A promise that resolves to an array of server health data.
+   * */
   async getServerHealth(options = {}) {
     let query = "SELECT * FROM server_health";
     const values = [];

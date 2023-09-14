@@ -32,7 +32,9 @@ The primary challenge is to create a JavaScript function that returns essential 
 ### Installation
 
 # Clone the repository
+```
 git clone https://github.com/UretzkyZvi/DNSHealthCheckly.git
+```
 
 # Navigate to the project folder
 ```
